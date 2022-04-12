@@ -2,8 +2,8 @@ from django.shortcuts import render
 from rest_framework import filters, viewsets
 from api.serializers import TitleSerializer, CommentSerializer, PostSerializer, CategorieSerializer, GenreSerializer
 
-from reviews.models import Title, Comment, Post, Categorie, Genre, User
-#from users.models import User
+from reviews.models import Title, Comment, Post, Categorie, Genre
+from users.models import User
 
 #class UserViewSet(viewsets.ReadOnlyModelViewSet):
     #queryset = User.objects.all()

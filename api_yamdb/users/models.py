@@ -7,6 +7,7 @@ from api_yamdb.settings import ROLE_CHOICES
 class User(AbstractUser):
     username = models.CharField(
         'Пользователь',
+        unique=True,
         max_length=150,
         blank=True,
         null=True,

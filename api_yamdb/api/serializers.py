@@ -1,4 +1,5 @@
-from reviews.models import Title, Comment, Post, Categorie, Genre, User
+from users.models import User
+from reviews.models import Title, Comment, Post, Categorie, Genre
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueTogetherValidator
