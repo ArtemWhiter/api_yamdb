@@ -1,13 +1,14 @@
 from django.shortcuts import render
 from rest_framework import filters, viewsets
 from api.serializers import TitleSerializer, CommentSerializer, PostSerializer, CategorieSerializer, GenreSerializer
+from api.serializers import UserSerializer
 
 from reviews.models import Title, Comment, Post, Categorie, Genre
 from users.models import User
 
-#class UserViewSet(viewsets.ReadOnlyModelViewSet):
-    #queryset = User.objects.all()
-    #serializer_class = UserSerializer
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
 class TitleViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Title.objects.all()

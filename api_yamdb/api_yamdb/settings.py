@@ -127,7 +127,7 @@ SIMPLE_JWT = {
    'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-ROLE_CHOICES = [    ('user', 'user'),
-                    ('moderator', 'moderator'),
-                    ('admin', 'admin'),
-                   ]
+ROLE_CHOICES = [('user', 'user'),
+                ('moderator', 'moderator'),
+                ('admin', 'admin'),
+                ]
