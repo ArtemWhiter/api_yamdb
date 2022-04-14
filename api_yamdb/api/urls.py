@@ -2,28 +2,24 @@ from rest_framework.authtoken import views
 from django.urls import include, path
 from rest_framework import routers
 
-from .views import TitleViewSet, CommentViewSet, PostViewSet, CategorieViewSet, GenreViewSet
+from .views import TitleViewSet, CommentViewSet, ReviewViewSet, CategoryViewSet, GenreViewSet
 
 app_name = 'api'
 
 router = routers.DefaultRouter()
 #router.register(r'users', UserViewSet)
 router.register(r'titles', TitleViewSet)
-router.register(r'categories', CategorieViewSet)
+router.register(r'categories', CategoryViewSet)
 router.register(r'genres', GenreViewSet)
-router.register(r'posts', PostViewSet)
-
-
 router.register(
-    r'posts/(?P<post_id>\d+)/comments',
-    CommentViewSet,
-    basename='comment',
+    r'titles/(?P<title_id>\d+)/reviews',
+    ReviewViewSet,
+    basename='Review',
 )
 #router.register(r'follow', FollowViewSet, basename='following',)
 
 urlpatterns = [
-    path('auth/signup/', include('djoser.urls')),
-    # JWT-эндпоинты, для управления JWT-токенами:
-    path('auth/signup/', include('djoser.urls.jwt')),
     path('', include(router.urls)),
+    path('auth/', include('djoser.urls')),
+    path('auth/', include('djoser.urls.jwt')),
 ]
