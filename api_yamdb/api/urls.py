@@ -16,7 +16,11 @@ router.register(
     ReviewViewSet,
     basename='Review',
 )
-#router.register(r'follow', FollowViewSet, basename='following',)
+router.register(
+    r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
+    CommentViewSet,
+    basename='Comment',
+)
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -32,12 +32,27 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         title_id = self.kwargs['title_id']
         title = get_object_or_404(Title, pk=title_id)
-        serializer.save(title=title, author=self.request.user, text="123")
+        serializer.save(title=title, author=self.request.user)
 
 
-class CommentViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Comment.objects.all()
+class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
+
+    def get_queryset(self):
+        review_id = self.kwargs['review_id']
+        review = get_object_or_404(Review, pk=review_id)
+        queryset = review.comments.all()
+        return queryset
+
+    def perform_create(self, serializer):
+        review_id = self.kwargs['review_id']
+        review = get_object_or_404(Review, pk=review_id)
+        serializer.save(review=review, author=self.request.user)
+
+    def perform_update(self, serializer):
+        review_id = self.kwargs['review_id']
+        review = get_object_or_404(Review, pk=review_id)
+        serializer.save(review=review, author=self.request.user)
 
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):

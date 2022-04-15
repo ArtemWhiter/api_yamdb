@@ -18,10 +18,16 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
 
 
-class CommentSerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
-        model = Comment
+        model = Category
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = '__all__'
+        model = Genre
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -30,24 +36,27 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
     
     class Meta:
-        fields = '__all__'
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
+        read_only_fields = ('title',)
         model = Review
         
     def validate(self, data):
-        title = get_object_or_404(Title, pk=2)
-        cnt = title.reviews.count()
-        if cnt > 0:
+        author = self.context['request'].user
+        title_id = self.context['view'].kwargs.get('title_id')
+        if Review.objects.filter(
+                author=author, title=title_id).exists():
             raise serializers.ValidationError(
-                'Можно оставлять не более одного комментария!')
+                'Можно оставлять не более одного отзыва'
+            )
         return data
 
 
-class CategorySerializer(serializers.ModelSerializer):
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True, slug_field='username'
+    )
+    
     class Meta:
-        fields = '__all__'
-        model = Category
-
-class GenreSerializer(serializers.ModelSerializer):
-    class Meta:
-        fields = '__all__'
-        model = Genre
+        fields = ('id', 'text', 'author', 'pub_date')
+        read_only_fields = ('review',)
+        model = Comment
