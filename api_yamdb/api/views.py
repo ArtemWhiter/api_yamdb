@@ -68,9 +68,12 @@ class CategoryViewSet(viewsets.ModelViewSet):
                             status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-    
-
-
-class GenreViewSet(viewsets.ReadOnlyModelViewSet):
+class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    pagination_class = LimitOffsetPagination
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    filterset_fields = ('name',)
+    search_fields = ('name',)
+    lookup_field = 'slug'
