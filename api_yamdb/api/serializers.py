@@ -4,6 +4,7 @@ from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueTogetherValidator
 from django.shortcuts import get_object_or_404
+from django.db.models import Avg
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -13,9 +14,17 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
+    rating = serializers.SerializerMethodField()
+
     class Meta:
-        fields = '__all__'
         model = Title
+        fields = ('id', 'rating')
+
+    def get_rating(self, obj):
+        rating = obj.reviews.aggregate(Avg('score')).get('score__avg')
+        if not rating:
+            return 'Нет оценок'
+        return round(rating, 2)
 
 
 class CategorySerializer(serializers.ModelSerializer):

@@ -1,10 +1,13 @@
 from django.shortcuts import render
 from rest_framework import filters, viewsets
-from api.serializers import TitleSerializer, CommentSerializer, ReviewSerializer, CategorySerializer, GenreSerializer
+from api.serializers import (TitleSerializer, CommentSerializer,
+                             ReviewSerializer, CategorySerializer,
+                             GenreSerializer)
 from django.shortcuts import get_object_or_404
 
 from reviews.models import Title, Comment, Review, Category, Genre
 from users.models import User
+from .permisions import IsOwnerOrReadOnly, IsAdmin, IsModerator, IsSuperUser
 
 #class UserViewSet(viewsets.ReadOnlyModelViewSet):
     #queryset = User.objects.all()
@@ -17,6 +20,9 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
+    permission_classes = (
+        IsOwnerOrReadOnly | IsAdmin | IsModerator | IsSuperUser,
+    )
 
     def get_queryset(self):
         title_id = self.kwargs['title_id']
@@ -37,6 +43,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
+    permission_classes = (
+        IsOwnerOrReadOnly | IsAdmin | IsModerator | IsSuperUser,
+    )
 
     def get_queryset(self):
         review_id = self.kwargs['review_id']
