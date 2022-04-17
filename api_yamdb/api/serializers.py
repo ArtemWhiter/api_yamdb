@@ -1,8 +1,6 @@
 from users.models import User
 from reviews.models import Title, Comment, Review, Category, Genre
 from rest_framework import serializers
-from rest_framework.relations import SlugRelatedField
-from rest_framework.validators import UniqueTogetherValidator
 from django.shortcuts import get_object_or_404
 
 
@@ -10,10 +8,22 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = User
+
+
 class TitleSerializer(serializers.ModelSerializer):
+    genre = serializers.SlugRelatedField(
+        slug_field='slug', many=True, queryset=Genre.objects.all()
+    )
+    category = serializers.SlugRelatedField(
+        slug_field='slug', queryset=Category.objects.all()
+    )
+
+
     class Meta:
         fields = '__all__'
         model = Title
+
+
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
@@ -39,11 +49,32 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
+
     class Meta:
         fields = ('name', 'slug')
         model = Category
 
 class GenreSerializer(serializers.ModelSerializer):
+
     class Meta:
         fields = ('name', 'slug')
         model = Genre
+
+
+class TitlePostSerializer(serializers.ModelSerializer):
+    genre = serializers.SlugRelatedField(
+        slug_field="slug", many=True, queryset=Genre.objects.all()
+    )
+    category = serializers.SlugRelatedField(
+        slug_field="slug", many=False, queryset=Category.objects.all()
+    )
+    class Meta:
+        model = Title
+        fields = (
+            'id',
+            'name',
+            'year',
+            'description',
+            'category',
+            'genre',
+        )
