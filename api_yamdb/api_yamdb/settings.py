@@ -12,6 +12,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+INTERNAL_IPS = [
+    '127.0.0.1',
+] 
 
 # Application definition
 
@@ -28,6 +31,7 @@ INSTALLED_APPS = [
     'reviews',
     'users',
     'api',
+    'debug_toolbar',
 
 ]
 
@@ -39,6 +43,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'api_yamdb.urls'
@@ -104,6 +109,12 @@ USE_L10N = True
 USE_TZ = True
 
 AUTH_USER_MODEL = 'users.User'
+
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
+
+ADMIN_EMAIL = 'admin@testAPI.com'
 # Static files (CSS, JavaScript, Images)
 
 STATIC_URL = '/static/'
@@ -117,6 +128,7 @@ REST_FRAMEWORK = {
 
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        #'rest_framework_simplejwt.authentication.JWTTokenUserAuthentication',
     ],
 
     'DEFAULT_FILTER_BACKENDS': [
@@ -126,7 +138,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': [
         'rest_framework.pagination.LimitOffsetPagination'
     ],
-    
+
     'PAGE_SIZE': 10,
 
 }
