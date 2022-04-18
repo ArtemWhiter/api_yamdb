@@ -3,6 +3,7 @@ from rest_framework import filters, viewsets, permissions, mixins
 from rest_framework.pagination import LimitOffsetPagination
 from api.serializers import TitleSerializer, CommentSerializer, ReviewSerializer, CategorySerializer, GenreSerializer, UserSerializer, TitlePostSerializer
 from django.shortcuts import get_object_or_404
+import django_filters
 from django_filters.rest_framework import DjangoFilterBackend
 
 
@@ -14,25 +15,31 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+
+class TitleFilter(django_filters.FilterSet):
+    category = django_filters.CharFilter(field_name="category__slug")
+    genre = django_filters.CharFilter(field_name="genre__slug")
+    name = django_filters.CharFilter(field_name="name", lookup_expr='icontains')
+    year = django_filters.NumberFilter(field_name="year")
+
+    class Meta:
+        model = Title
+        fields = ["category", "genre", "name", "year"]
+
+
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
-    # permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    filterset_fields = ('name',)
-    search_fields = ('name',)
+    filterset_class = TitleFilter
     lookup_field = 'slug'    
 
     def get_serializer_class(self):
         if self.action in ['list', 'retrieve']:
             return TitleSerializer
         return TitlePostSerializer
-
-    # def perform_create(self, serializer):
-    #     serializer.save(genre=self.request.genre.name)
-    #     serializer.save(category=self.request.category.name)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
