@@ -11,6 +11,7 @@ from reviews.models import Title, Comment, Category, Genre
 from users.models import User
 from .permissions import IsAdminOrReadOnly
 
+
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -31,10 +32,8 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnly,)
-    pagination_class = LimitOffsetPagination
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
-    lookup_field = 'slug'    
 
     def get_serializer_class(self):
         if self.action in ['list', 'retrieve']:

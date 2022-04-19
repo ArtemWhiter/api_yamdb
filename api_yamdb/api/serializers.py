@@ -40,6 +40,7 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
         model = Category
 
+
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -50,7 +51,6 @@ class GenreSerializer(serializers.ModelSerializer):
 class TitleSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
-
 
     class Meta:
         fields = '__all__'
