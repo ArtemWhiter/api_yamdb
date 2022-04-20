@@ -1,57 +1,28 @@
-from asyncio import mixins
-from rest_framework import generics
-from django.shortcuts import get_object_or_404, render
-from rest_framework import filters, viewsets
-from api.serializers import TitleSerializer, CommentSerializer, PostSerializer, CategorieSerializer, GenreSerializer
-from api.permissions import NewUserOnly, IsAdminOnly
-from api_yamdb.settings import ADMIN_EMAIL
-from .serializers import UserCreateSerializer, AdminUserCreateSerializer
-
-from rest_framework_simplejwt.views import TokenObtainPairView
-
-from reviews.models import Title, Comment, Post, Categorie, Genre
-from users.models import User
+from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from rest_framework.response import Response
-from rest_framework import status
-import uuid
+
+from django.shortcuts import get_object_or_404
+from rest_framework import status, viewsets
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework_simplejwt.tokens import AccessToken
 
 
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def signup(request):
-    serializer = UserCreateSerializer(data=request.data)
-    if serializer.is_valid():
-        #user = serializer.save()
-        serializer.save()
-        username=serializer.data['username']
-        email=serializer.data['email']
-        confirmation_code=str(uuid.uuid4()),
-        #confirmation_code=serializer.data['confirmation_code']
-        #confirmation_code=serializer.data[uuid.uuid4()]
-        send_mail(
-            'API pesonal code',
-            f'Hi, {username}! Please, save your pesonal code: {confirmation_code}',
-            ADMIN_EMAIL,
-            [email],
-            fail_silently=False,
-        )
-        #send_confirmation_code(user)
-        #serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
+from api.permissions import IsAdminOnly
+from api.serializers import (AdminUserCreateSerializer, CategorieSerializer,
+                             CommentSerializer, GenreSerializer,
+                             PostSerializer, TitleSerializer,
+                             TokenObtainSerializer, UserCreateSerializer)
+from api_yamdb.settings import ADMIN_EMAIL
+from reviews.models import Categorie, Comment, Genre, Post, Title
+from users.models import User
 
 
 class AdminUserCreateViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = AdminUserCreateSerializer
-    #permission_classes = (IsAdminOnly, )
-    permission_classes = (AllowAny, )
+    permission_classes = (IsAdminOnly, )
 
     def post(self, request, *args, **kwargs):
         serializer = AdminUserCreateSerializer(data=request.data)
@@ -63,33 +34,66 @@ class AdminUserCreateViewSet(viewsets.ModelViewSet):
 
 class UserCreate(APIView):
     queryset = User.objects.all()
-    #serializer_class = UserCreateSerializer
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
 
     def post(self, request, *args, **kwargs):
         serializer = UserCreateSerializer(data=request.data)
-        #user = get_object_or_404(User, username=username, email=email)
-        if serializer.is_valid():
-            #user = get_object_or_404(
-                #User, 
-                #username=self.kwargs.get('username'),
-                #email=self.kwargs.get('email')
-            #)
-            #print(user)
-            #username = serializer.data['username']
-            #email = serializer.data['email']
-            #user = get_object_or_404(User, username=username, email=email)
-            #confirmation_code=str(uuid.uuid4()),
-            #send_mail(
-                #'api token',
-                #f'Please, save your pesonal code: {confirmation_code}',
-                #ADMIN_EMAIL,
-                #[serializer.data['email']],    
-                #fail_silently=False,
-            #)
+
+        if serializer.is_valid(raise_exception=True):
             serializer.save()
-            #serializer.save(user=user, )
+
+            user = get_object_or_404(
+                User,
+                username=serializer.validated_data['username']
+            )
+            confirmation_code = default_token_generator.make_token(user)
+            send_mail(
+                'Yamdb api pesonal code',
+                f'Please, save your pesonal code: {confirmation_code}',
+                ADMIN_EMAIL,
+                [serializer.validated_data['email']],
+                fail_silently=False,
+            )
             return Response(serializer.data, status=status.HTTP_200_OK)
+        elif User.objects.filter(username=request.data.get('username'),
+                                 email=request.data.get('email')).exists():
+
+            user = get_object_or_404(
+                User,
+                username=request.data.get('username'),
+                email=request.data.get('email'),
+            )
+            confirmation_code = default_token_generator.make_token(user)
+            send_mail(
+                'api token',
+                f'Please, save your pesonal code: {confirmation_code}',
+                ADMIN_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TokenObtain(APIView):
+    queryset = User.objects.all()
+    permission_classes = (AllowAny,)
+
+    def post(self, request, *args, **kwargs):
+        serializer = TokenObtainSerializer(data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+        user = get_object_or_404(
+            User,
+            username=serializer.validated_data["username"]
+        )
+
+        if default_token_generator.check_token(
+                        user,
+                        serializer.validated_data["confirmation_code"]):
+            token = AccessToken.for_user(user)
+            return Response({"token": str(token)}, status=status.HTTP_200_OK)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -111,6 +115,7 @@ class PostViewSet(viewsets.ReadOnlyModelViewSet):
 class CategorieViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Categorie.objects.all()
     serializer_class = CategorieSerializer
+
 
 class GenreViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Genre.objects.all()

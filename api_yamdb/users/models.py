@@ -1,21 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
-from api_yamdb.settings import ROLE_CHOICES
 from django.db.models import UniqueConstraint
 
-
-#class Confirmation(models.Model):
-    #text = models.CharField(
-        #'Код подтверждения',
-        #max_length=30,
-        #default='123',
-        #null=True,
-        #blank=True
-    #)
-
-    #def __str__(self):
-        #return self.confirmation_code
+from api_yamdb.settings import ROLE_CHOICES
 
 
 class User(AbstractUser):
@@ -56,17 +43,22 @@ class User(AbstractUser):
         default='user'
     )
 
-    confirmation_code = models.CharField(
-        'Индивидуальный код подтверждения',
-        max_length=40,
-        blank=True,
-        null=True,
-    )
-
     def __str__(self):
         return self.username
-    #class Meta:
-        #UniqueConstraint(
-            #fields=['user', 'confirmation_code'],
-            #name='unique_code'
-        #)
+
+    class Meta:
+        UniqueConstraint(
+            fields=['user', 'email'],
+            name='unique_user'
+        )
+    @property
+    def is_admin(self):
+        return self.role == 'admin'
+
+    @property
+    def is_moderator(self):
+        return self.role == 'moderator'
+
+    @property
+    def is_user(self):
+        return self.role == 'user'

@@ -1,15 +1,16 @@
 import imp
+
 from django.shortcuts import render
+from django_filters.rest_framework import DjangoFilterBackend
 from pyparsing import Literal
 from rest_framework import filters, viewsets
-
-
-from .serializers import UserSerializer, UserListSerializer
 from rest_framework.pagination import LimitOffsetPagination
-from django_filters.rest_framework import DjangoFilterBackend
-from .models import User
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
+
 from api.permissions import IsAdminOnly, IsUserOrAdminOnly
+
+from .models import User
+from .serializers import UserListSerializer, UserSerializer
 
 
 class UserListViewSet(viewsets.ModelViewSet):
