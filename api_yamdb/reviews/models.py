@@ -73,12 +73,6 @@ class User(AbstractUser):
         return self.role == 'user'
 
 
-class Title(models.Model):
-
-    def __str__(self):
-        return self.title
-
-
 class Category(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True)

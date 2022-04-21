@@ -18,16 +18,15 @@ from api.serializers import (AdminUserCreateSerializer,
                              TokenObtainSerializer, UserCreateSerializer,
                              UserSerializer)
 from api_yamdb.settings import ADMIN_EMAIL
-from reviews.models import Comment, Genre, Title, User
+from reviews.models import Genre, Title, User
 
-from django.shortcuts import render
 from rest_framework import filters, viewsets
 from api.serializers import (TitleSerializer, CommentSerializer,
                              ReviewSerializer, CategorySerializer,
                              GenreSerializer, TitlePostSerializer)
 from django.shortcuts import get_object_or_404
 
-from reviews.models import Title, Comment, Review, Category, Genre
+from reviews.models import Title, Review, Category, Genre
 from .permissions import IsOwnerOrReadOnly, IsAdmin, IsModerator, IsSuperUser, CreateIsAdmin, IsAdminOrReadOnly
 
 
@@ -143,6 +142,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
+    pagination_class = PageNumberPagination
 
     def get_serializer_class(self):
         if self.action in ['list', 'retrieve']:
@@ -155,6 +155,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = (
         IsOwnerOrReadOnly | IsAdmin | IsModerator | IsSuperUser,
     )
+    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         title_id = self.kwargs['title_id']
@@ -178,6 +179,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = (
         IsOwnerOrReadOnly | IsAdmin | IsModerator | IsSuperUser,
     )
+    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         review_id = self.kwargs['review_id']
@@ -203,7 +205,7 @@ class CategoryViewSet(mixins.CreateModelMixin,
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAdminOrReadOnly,)
-    pagination_class = PageNumberPagination # LimitOffsetPagination
+    pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     filterset_fields = ('name',)
     search_fields = ('name',)
@@ -217,7 +219,7 @@ class GenreViewSet(mixins.CreateModelMixin,
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAdminOrReadOnly,)
-    pagination_class = PageNumberPagination # LimitOffsetPagination
+    pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     filterset_fields = ('name',)
     search_fields = ('name',)
