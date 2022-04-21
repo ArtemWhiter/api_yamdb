@@ -1,7 +1,9 @@
+
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 
-from reviews.models import Categorie, Comment, Genre, Post, Title, User
+from reviews.models import Title, Comment, Review, Category, Genre, User
+from django.db.models import Avg
 
 
 class AdminUserCreateSerializer(serializers.ModelSerializer):
@@ -74,30 +76,59 @@ class TokenObtainSerializer(serializers.Serializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
+    rating = serializers.SerializerMethodField()
+
     class Meta:
-        fields = '__all__'
         model = Title
+        fields = ('id', 'rating')
+
+    def get_rating(self, obj):
+        rating = obj.reviews.aggregate(Avg('score')).get('score__avg')
+        if not rating:
+            return 'Нет оценок'
+        return round(rating, 2)
 
 
-class CommentSerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
-        model = Comment
-
-
-class PostSerializer(serializers.ModelSerializer):
-    class Meta:
-        fields = '__all__'
-        model = Post
-
-
-class CategorieSerializer(serializers.ModelSerializer):
-    class Meta:
-        fields = '__all__'
-        model = Categorie
+        model = Category
 
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Genre
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True, slug_field='username'
+    )
+    
+    class Meta:
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
+        read_only_fields = ('title',)
+        model = Review
+        
+    def validate(self, data):
+        author = self.context['request'].user
+        title_id = self.context['view'].kwargs.get('title_id')
+        if Review.objects.filter(
+                author=author, title=title_id).exists():
+            raise serializers.ValidationError(
+                'Можно оставлять не более одного отзыва'
+            )
+        return data
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True, slug_field='username'
+    )
+    
+    class Meta:
+        fields = ('id', 'text', 'author', 'pub_date')
+        read_only_fields = ('review',)
+        model = Comment
+
