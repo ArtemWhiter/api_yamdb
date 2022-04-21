@@ -15,7 +15,8 @@ class AdminUserCreateSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
         validators=[
             UniqueValidator(queryset=User.objects.all())
-        ]
+        ],
+        required=True,
     )
 
     class Meta:
@@ -46,7 +47,8 @@ class UserCreateSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
         validators=[
             UniqueValidator(queryset=User.objects.all())
-        ]
+        ],
+        required=True,
     )
 
     def validate(self, data):
@@ -57,6 +59,27 @@ class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'email',)
+
+
+class UserSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(read_only=True,)
+    email = serializers.EmailField(
+        validators=[
+            UniqueValidator(queryset=User.objects.all())
+        ],
+    )
+    #role = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
+        )
+
+    def validate(self, data):
+        if data['username'] == 'me':
+            raise serializers.ValidationError("Can't rename user to 'me'")
+        return data
 
 
 class TokenObtainSerializer(serializers.Serializer):

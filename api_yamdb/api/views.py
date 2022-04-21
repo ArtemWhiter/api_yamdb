@@ -3,26 +3,33 @@ from django.core.mail import send_mail
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 from api.permissions import IsAdminOnly
 from api.serializers import (AdminUserCreateSerializer, CategorieSerializer,
                              CommentSerializer, GenreSerializer,
                              PostSerializer, TitleSerializer,
-                             TokenObtainSerializer, UserCreateSerializer)
+                             TokenObtainSerializer, UserCreateSerializer, UserSerializer)
 from api_yamdb.settings import ADMIN_EMAIL
 from reviews.models import Categorie, Comment, Genre, Post, Title
 from users.models import User
 
 
-class AdminUserCreateViewSet(viewsets.ModelViewSet):
+class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = AdminUserCreateSerializer
     permission_classes = (IsAdminOnly, )
+    #permission_classes = (AllowAny,)
+    pagination_class = PageNumberPagination
+
+    lookup_field = 'username'
 
     def post(self, request, *args, **kwargs):
         serializer = AdminUserCreateSerializer(data=request.data)
@@ -31,10 +38,34 @@ class AdminUserCreateViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(
+        detail=False, methods=['get', 'patch'],
+        url_path='me', url_name='me',
+        permission_classes=(IsAuthenticated,)
+    )
+    def about_me(self, request):
+        #user = request.user
+        #serializer = UserSerializer(request.user)
+        serializer = UserSerializer()
+        if request.method == "GET":
+            serializer = UserSerializer(request.user)
+            #serializer = self.get_serializer(request.user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        elif request.method == 'PATCH':
+            serializer = UserSerializer(
+                request.user, data=request.data, partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
+
 
 class UserCreate(APIView):
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
+    serializer_class = UserSerializer
+
 
     def post(self, request, *args, **kwargs):
         serializer = UserCreateSerializer(data=request.data)

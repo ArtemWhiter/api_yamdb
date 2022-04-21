@@ -4,7 +4,7 @@ from rest_framework import routers
 
 from users.views import UserViewSet
 
-from .views import (AdminUserCreateViewSet, CategorieViewSet, CommentViewSet,
+from .views import (UserViewSet, CategorieViewSet, CommentViewSet,
                     GenreViewSet, PostViewSet, TitleViewSet, TokenObtain,
                     UserCreate)
 
@@ -12,8 +12,8 @@ app_name = 'api'
 
 router = routers.DefaultRouter()
 
-router.register(r'users', AdminUserCreateViewSet)
-router.register(r'users/(?P<username>\d+)/', UserViewSet)
+router.register(r'users', UserViewSet, basename='users')
+#router.register(r'users/(?P<username>\d+)/', UserViewSet)
 
 router.register(r'titles', TitleViewSet)
 router.register(r'categories', CategorieViewSet)
