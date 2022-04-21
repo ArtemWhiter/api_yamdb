@@ -2,19 +2,15 @@ from django.urls import include, path
 from rest_framework import routers
 
 
-from users.views import UserViewSet
-
-from .views import (UserViewSet, CategorieViewSet, CommentViewSet,
-                    GenreViewSet, PostViewSet, TitleViewSet, TokenObtain,
-                    UserCreate)
+from .views import (CategorieViewSet, CommentViewSet, GenreViewSet,
+                    PostViewSet, TitleViewSet, TokenObtain, UserCreate,
+                    UserViewSet)
 
 app_name = 'api'
 
 router = routers.DefaultRouter()
 
 router.register(r'users', UserViewSet, basename='users')
-#router.register(r'users/(?P<username>\d+)/', UserViewSet)
-
 router.register(r'titles', TitleViewSet)
 router.register(r'categories', CategorieViewSet)
 router.register(r'genres', GenreViewSet)

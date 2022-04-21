@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 
-from reviews.models import Categorie, Comment, Genre, Post, Title
-from users.models import User
+from reviews.models import Categorie, Comment, Genre, Post, Title, User
 
 
 class AdminUserCreateSerializer(serializers.ModelSerializer):
@@ -31,11 +30,6 @@ class AdminUserCreateSerializer(serializers.ModelSerializer):
             )
         ]
 
-    def validate(self, data):
-        if data['username'] == 'me':
-            raise serializers.ValidationError("Can't create user 'me'")
-        return data
-
 
 class UserCreateSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
@@ -62,24 +56,16 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(read_only=True,)
-    email = serializers.EmailField(
-        validators=[
-            UniqueValidator(queryset=User.objects.all())
-        ],
-    )
-    #role = serializers.StringRelatedField(read_only=True)
+    username = serializers.CharField(read_only=True)
+    email = serializers.EmailField(required=True)
+    role = serializers.StringRelatedField(required=False, read_only=True)
 
     class Meta:
         model = User
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role'
         )
-
-    def validate(self, data):
-        if data['username'] == 'me':
-            raise serializers.ValidationError("Can't rename user to 'me'")
-        return data
+    read_only_fields = ('username', 'role',)
 
 
 class TokenObtainSerializer(serializers.Serializer):

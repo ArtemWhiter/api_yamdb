@@ -1,32 +1,28 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
-from django_filters.rest_framework import DjangoFilterBackend
 
-
-from api.permissions import IsAdminOnly
+from api.permissions import IsAdmin
 from api.serializers import (AdminUserCreateSerializer, CategorieSerializer,
                              CommentSerializer, GenreSerializer,
                              PostSerializer, TitleSerializer,
-                             TokenObtainSerializer, UserCreateSerializer, UserSerializer)
+                             TokenObtainSerializer, UserCreateSerializer,
+                             UserSerializer)
 from api_yamdb.settings import ADMIN_EMAIL
-from reviews.models import Categorie, Comment, Genre, Post, Title
-from users.models import User
+from reviews.models import Categorie, Comment, Genre, Post, Title, User
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = AdminUserCreateSerializer
-    permission_classes = (IsAdminOnly, )
-    #permission_classes = (AllowAny,)
+    permission_classes = (IsAdmin, )
     pagination_class = PageNumberPagination
 
     lookup_field = 'username'
@@ -39,17 +35,15 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(
-        detail=False, methods=['get', 'patch'],
-        url_path='me', url_name='me',
-        permission_classes=(IsAuthenticated,)
+        detail=False,
+        methods=['get', 'patch'],
+        url_path='me',
+        permission_classes=(IsAuthenticated or IsAdmin, )
     )
     def about_me(self, request):
-        #user = request.user
-        #serializer = UserSerializer(request.user)
         serializer = UserSerializer()
         if request.method == "GET":
             serializer = UserSerializer(request.user)
-            #serializer = self.get_serializer(request.user)
             return Response(serializer.data, status=status.HTTP_200_OK)
         elif request.method == 'PATCH':
             serializer = UserSerializer(
@@ -58,7 +52,7 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserCreate(APIView):
@@ -66,44 +60,37 @@ class UserCreate(APIView):
     permission_classes = (AllowAny,)
     serializer_class = UserSerializer
 
-
     def post(self, request, *args, **kwargs):
+        if User.objects.filter(
+                username=request.data.get('username'),
+                email=request.data.get('email'),
+                ).exists():
+            send_personal_code(request)
+            return Response(request.data, status=status.HTTP_200_OK)
+
         serializer = UserCreateSerializer(data=request.data)
 
         if serializer.is_valid(raise_exception=True):
             serializer.save()
-
-            user = get_object_or_404(
-                User,
-                username=serializer.validated_data['username']
-            )
-            confirmation_code = default_token_generator.make_token(user)
-            send_mail(
-                'Yamdb api pesonal code',
-                f'Please, save your pesonal code: {confirmation_code}',
-                ADMIN_EMAIL,
-                [serializer.validated_data['email']],
-                fail_silently=False,
-            )
+            send_personal_code(request)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        elif User.objects.filter(username=request.data.get('username'),
-                                 email=request.data.get('email')).exists():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            user = get_object_or_404(
+
+def send_personal_code(request, *args, **kwargs):
+    user = get_object_or_404(
                 User,
                 username=request.data.get('username'),
                 email=request.data.get('email'),
             )
-            confirmation_code = default_token_generator.make_token(user)
-            send_mail(
-                'api token',
-                f'Please, save your pesonal code: {confirmation_code}',
-                ADMIN_EMAIL,
-                [user.email],
-                fail_silently=False,
-            )
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    confirmation_code = default_token_generator.make_token(user)
+    return send_mail(
+                    'Yamdb api pesonal code',
+                    f'Please, save your pesonal code: {confirmation_code}',
+                    ADMIN_EMAIL,
+                    [user.email],
+                    fail_silently=False,
+                )
 
 
 class TokenObtain(APIView):
