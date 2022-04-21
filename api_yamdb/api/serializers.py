@@ -75,12 +75,41 @@ class TokenObtainSerializer(serializers.Serializer):
     confirmation_code = serializers.CharField()
 
 
-class TitleSerializer(serializers.ModelSerializer):
-    rating = serializers.SerializerMethodField()
+# class TitleSerializer(serializers.ModelSerializer):
+#     rating = serializers.SerializerMethodField()
+
+#     class Meta:
+#         model = Title
+#         fields = ('id', 'rating')
+
+#     def get_rating(self, obj):
+#         rating = obj.reviews.aggregate(Avg('score')).get('score__avg')
+#         if not rating:
+#             return 'Нет оценок'
+#         return round(rating, 2)
+
+
+class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
+        fields = ('name', 'slug')
+        model = Category
+
+
+class GenreSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('name', 'slug')
+        model = Genre
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    genre = GenreSerializer(many=True, read_only=True)
+    category = CategorySerializer(read_only=True)
+
+    class Meta:
+        fields = '__all__'
         model = Title
-        fields = ('id', 'rating')
 
     def get_rating(self, obj):
         rating = obj.reviews.aggregate(Avg('score')).get('score__avg')
@@ -89,16 +118,17 @@ class TitleSerializer(serializers.ModelSerializer):
         return round(rating, 2)
 
 
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        fields = '__all__'
-        model = Category
+class TitlePostSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        slug_field="slug", many=False, queryset=Category.objects.all()
+    )
+    genre = serializers.SlugRelatedField(
+        slug_field="slug", many=True, queryset=Genre.objects.all()
+    )
 
-
-class GenreSerializer(serializers.ModelSerializer):
     class Meta:
+        model = Title
         fields = '__all__'
-        model = Genre
 
 
 class ReviewSerializer(serializers.ModelSerializer):

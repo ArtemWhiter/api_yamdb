@@ -47,3 +47,5 @@ sqlparse==0.4.2
 toml==0.10.2
 uritemplate==4.1.1
 urllib3==1.26.9
+django-filter==21.1
+djangorestframework-simplejwt==4.7.2
