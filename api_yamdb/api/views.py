@@ -26,14 +26,13 @@ from api.serializers import (TitleSerializer, CommentSerializer,
 from django.shortcuts import get_object_or_404
 
 from reviews.models import Title, Comment, Review, Category, Genre
-from .permisions import IsOwnerOrReadOnly, IsAdmin, IsModerator, IsSuperUser
-
+from .permissions import IsOwnerOrReadOnly, IsAdmin, IsModerator, IsSuperUser, CreateIsAdmin
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = AdminUserCreateSerializer
-    permission_classes = (IsAdmin, )
+    permission_classes = (CreateIsAdmin, )
     pagination_class = PageNumberPagination
 
     lookup_field = 'username'
