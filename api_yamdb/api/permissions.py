@@ -30,40 +30,65 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         return obj.author == request.user
 
 
-class IsAdmin(permissions.BasePermission):
+class IsUser(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.user.is_authenticated:
-            return request.user.role == "admin"
-        return False
+        user = request.user
+        return (
+            user.is_authenticated and user.is_user
+            or request.method in permissions.SAFE_METHODS
+        )
 
     def has_object_permission(self, request, view, obj):
-        if request.user.is_authenticated:
-            return request.user.role == "admin"
-        return False
+        return (
+            obj.author == request.user
+            or request.method in permissions.SAFE_METHODS
+        )
+
+
+class IsAdmin(permissions.BasePermission):
+    def has_permission(self, request, view):
+        user = request.user
+        return (
+            user.is_authenticated and user.is_admin
+            or user.is_superuser
+        )
+
+    def has_object_permission(self, request, view, obj):
+        user = request.user
+        return (
+            user.is_authenticated and user.is_admin
+            or user.is_superuser
+        )
 
 
 class IsModerator(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.user.is_authenticated:
-            return request.user.role == "moderator"
-        return False
+        user = request.user
+        return (
+            user.is_authenticated and user.is_moderator
+            or user.is_staff
+        )
 
     def has_object_permission(self, request, view, obj):
-        if request.user.is_authenticated:
-            return request.user.role == "moderator"
-        return False
+        user = request.user
+        return (
+            user.is_authenticated and user.is_moderator
+            or user.is_staff
+        )
 
 
 class IsSuperUser(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.user.is_authenticated:
-            return request.user.is_superuser
-        return False
+        user = request.user
+        return (
+            user.is_authenticated and user.is_superuser
+        )
 
     def has_object_permission(self, request, view, obj):
-        if request.user.is_authenticated:
-            return request.user.is_superuser
-        return False
+        user = request.user
+        return (
+            user.is_authenticated and user.is_superuser
+        )
 
 
 class IsAuthOrReadOnly(permissions.BasePermission):

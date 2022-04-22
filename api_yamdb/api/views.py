@@ -28,7 +28,7 @@ from api.serializers import (TitleSerializer, CommentSerializer,
 from django.shortcuts import get_object_or_404
 
 from reviews.models import Title, Comment, Review, Category, Genre
-from .permissions import IsOwnerOrReadOnly, IsAdmin, IsModerator, IsSuperUser, CreateIsAdmin, IsAdminOrReadOnly, IsAuthOrReadOnly
+from .permissions import IsOwnerOrReadOnly, IsAdmin, IsModerator, IsSuperUser, CreateIsAdmin, IsAdminOrReadOnly, IsAuthOrReadOnly, IsUser
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -157,7 +157,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (
-        IsOwnerOrReadOnly | IsAdmin | IsModerator | IsSuperUser,
+        IsUser | IsAdmin | IsModerator | IsSuperUser,
     )
 
     def get_queryset(self):
