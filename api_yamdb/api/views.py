@@ -11,7 +11,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 import django_filters
 from django_filters.rest_framework import DjangoFilterBackend
 
-from api.permissions import IsAdmin
+#from api.permissions import IsAdmin
 from api.serializers import (AdminUserCreateSerializer, 
                              CommentSerializer, GenreSerializer,
                              TitleSerializer,
@@ -28,7 +28,7 @@ from api.serializers import (TitleSerializer, CommentSerializer,
 from django.shortcuts import get_object_or_404
 
 from reviews.models import Title, Comment, Review, Category, Genre
-from .permissions import IsOwnerOrReadOnly, IsAdmin, IsModerator, IsSuperUser, CreateIsAdmin, IsAdminOrReadOnly
+from .permissions import IsOwnerOrReadOnly, IsAdmin, IsModerator, IsSuperUser, CreateIsAdmin, IsAdminOrReadOnly, IsAuthOrReadOnly
 
 
 class UserViewSet(viewsets.ModelViewSet):
