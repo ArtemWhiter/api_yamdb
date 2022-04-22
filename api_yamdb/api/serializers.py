@@ -75,20 +75,6 @@ class TokenObtainSerializer(serializers.Serializer):
     confirmation_code = serializers.CharField()
 
 
-# class TitleSerializer(serializers.ModelSerializer):
-#     rating = serializers.SerializerMethodField()
-
-#     class Meta:
-#         model = Title
-#         fields = ('id', 'rating')
-
-#     def get_rating(self, obj):
-#         rating = obj.reviews.aggregate(Avg('score')).get('score__avg')
-#         if not rating:
-#             return 'Нет оценок'
-#         return round(rating, 2)
-
-
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -115,7 +101,7 @@ class TitleSerializer(serializers.ModelSerializer):
         rating = obj.reviews.aggregate(Avg('score')).get('score__avg')
         if not rating:
             return 'Нет оценок'
-        return round(rating, 2)
+        return round(rating, 1)
 
 
 class TitlePostSerializer(serializers.ModelSerializer):

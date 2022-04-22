@@ -11,10 +11,10 @@ class CreateIsAdmin(permissions.BasePermission):
         
 class IsAdminOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
-            if request.user.is_authenticated:
-                return request.user.role == "admin"
-            else:
-                return request.method in SAFE_METHODS
+        if request.user.is_authenticated:
+            return request.user.role == "admin"
+        else:
+            return request.method in SAFE_METHODS
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
@@ -30,14 +30,20 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 
 class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.role == "admin"
+        if request.user.is_authenticated:
+            return request.user.role == "admin"
+        return False
 
 
 class IsModerator(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.role == "moderator"
+        if request.user.is_authenticated:
+            return request.user.role == "moderator"
+        return False
 
 
 class IsSuperUser(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_superuser
+        if request.user.is_authenticated:
+            return request.user.is_superuser
+        return False

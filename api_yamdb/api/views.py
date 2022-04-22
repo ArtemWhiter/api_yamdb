@@ -138,6 +138,10 @@ class TitleFilter(django_filters.FilterSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnly,)
@@ -167,10 +171,11 @@ class ReviewViewSet(viewsets.ModelViewSet):
         title = get_object_or_404(Title, pk=title_id)
         serializer.save(title=title, author=self.request.user)
 
-    def perform_update(self, serializer):
-        title_id = self.kwargs['title_id']
-        title = get_object_or_404(Title, pk=title_id)
-        serializer.save(title=title, author=self.request.user)
+
+ #   def perform_update(self, serializer):
+ #       title_id = self.kwargs['title_id']
+ #       title = get_object_or_404(Title, pk=title_id)
+ #       serializer.save(title=title, author=self.request.user)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -190,10 +195,10 @@ class CommentViewSet(viewsets.ModelViewSet):
         review = get_object_or_404(Review, pk=review_id)
         serializer.save(review=review, author=self.request.user)
 
-    def perform_update(self, serializer):
-        review_id = self.kwargs['review_id']
-        review = get_object_or_404(Review, pk=review_id)
-        serializer.save(review=review, author=self.request.user)
+#    def perform_update(self, serializer):
+#        review_id = self.kwargs['review_id']
+#        review = get_object_or_404(Review, pk=review_id)
+#        serializer.save(review=review, author=self.request.user)
 
 
 class CategoryViewSet(mixins.CreateModelMixin, 
