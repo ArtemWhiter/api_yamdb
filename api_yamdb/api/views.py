@@ -67,9 +67,8 @@ class UserCreate(APIView):
 
     def post(self, request, *args, **kwargs):
         if User.objects.filter(
-                username=request.data.get('username'),
-                email=request.data.get('email'),
-                ).exists():
+            username=request.data.get('username'),
+            email=request.data.get('email'),).exists():
             send_personal_code(request)
             return Response(request.data, status=status.HTTP_200_OK)
 
@@ -84,18 +83,18 @@ class UserCreate(APIView):
 
 def send_personal_code(request, *args, **kwargs):
     user = get_object_or_404(
-                User,
-                username=request.data.get('username'),
-                email=request.data.get('email'),
-            )
+        User,
+        username=request.data.get('username'),
+        email=request.data.get('email'),
+    )
     confirmation_code = default_token_generator.make_token(user)
     return send_mail(
-                    'Yamdb api pesonal code',
-                    f'Please, save your pesonal code: {confirmation_code}',
-                    ADMIN_EMAIL,
-                    [user.email],
-                    fail_silently=False,
-            )
+        'Yamdb api pesonal code',
+        f'Please, save your pesonal code: {confirmation_code}',
+        ADMIN_EMAIL,
+        [user.email],
+        fail_silently=False,
+        )
 
 
 class TokenObtain(APIView):
@@ -112,9 +111,9 @@ class TokenObtain(APIView):
         )
 
         if default_token_generator.check_token(
-                        user,
-                        serializer.validated_data["confirmation_code"]
-                        ):
+            user,
+            serializer.validated_data["confirmation_code"]
+        ):
             token = AccessToken.for_user(user)
             return Response({"token": str(token)}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
