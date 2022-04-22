@@ -68,7 +68,8 @@ class UserCreate(APIView):
     def post(self, request, *args, **kwargs):
         if User.objects.filter(
             username=request.data.get('username'),
-            email=request.data.get('email'),).exists():
+            email=request.data.get('email'),
+        ).exists():
             send_personal_code(request)
             return Response(request.data, status=status.HTTP_200_OK)
 
@@ -94,7 +95,7 @@ def send_personal_code(request, *args, **kwargs):
         ADMIN_EMAIL,
         [user.email],
         fail_silently=False,
-        )
+    )
 
 
 class TokenObtain(APIView):

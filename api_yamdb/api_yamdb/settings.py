@@ -158,4 +158,4 @@ ROLE_CHOICES = [
     ('user', 'user'),
     ('moderator', 'moderator'),
     ('admin', 'admin'),
-    ]
+]
