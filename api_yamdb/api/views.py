@@ -153,8 +153,8 @@ class TitleViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (
-        IsUser | IsAdmin | IsModerator | IsSuperUser,
-        #IsAdmin | IsModerator, #| IsSuperUser,
+       # IsUser | IsAdmin | IsModerator | IsSuperUser,
+        IsOwnerOrReadOnly
     )
     pagination_class = PageNumberPagination
     
