@@ -127,7 +127,13 @@ class Review(models.Model):
             MinValueValidator(0)
         ],
     )
-
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'title'],
+                name='unique review')
+        ]
+        ordering = ['-id',]
     def __str__(self):
         return self.text
 
@@ -140,6 +146,10 @@ class Comment(models.Model):
     text = models.TextField()
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True)
+
+    class Meta:
+        
+        ordering = ['-id',]
 
     def __str__(self):
         return self.text
