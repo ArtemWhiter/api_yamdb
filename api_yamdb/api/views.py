@@ -95,7 +95,7 @@ def send_personal_code(request, *args, **kwargs):
                     ADMIN_EMAIL,
                     [user.email],
                     fail_silently=False,
-                )
+            )
 
 
 class TokenObtain(APIView):
@@ -187,11 +187,6 @@ class CommentViewSet(viewsets.ModelViewSet):
         review_id = self.kwargs['review_id']
         review = get_object_or_404(Review, pk=review_id)
         serializer.save(review=review, author=self.request.user)
-
-#    def perform_update(self, serializer):
-#        review_id = self.kwargs['review_id']
-#        review = get_object_or_404(Review, pk=review_id)
-#        serializer.save(review=review, author=self.request.user)
 
 
 class CategoryViewSet(mixins.CreateModelMixin,
