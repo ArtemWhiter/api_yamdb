@@ -1,9 +1,8 @@
 
+from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
-
-from reviews.models import Title, Comment, Review, Category, Genre, User
-from django.db.models import Avg
+from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class AdminUserCreateSerializer(serializers.ModelSerializer):
@@ -92,16 +91,25 @@ class GenreSerializer(serializers.ModelSerializer):
 class TitleSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
+    rating = serializers.SerializerMethodField()
 
     class Meta:
-        fields = '__all__'
+        fields = (
+            "id",
+            "name",
+            "year",
+            "rating",
+            "description",
+            "category",
+            "genre",
+        )
         model = Title
 
     def get_rating(self, obj):
         rating = obj.reviews.aggregate(Avg('score')).get('score__avg')
         if not rating:
-            return 'Нет оценок'
-        return round(rating, 2)
+            return None
+        return round(rating, 1)
 
 
 class TitlePostSerializer(serializers.ModelSerializer):
@@ -114,20 +122,30 @@ class TitlePostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = '__all__'
+        fields = (
+            "id",
+            "name",
+            "year",
+            "description",
+            "category",
+            "genre",
+        )
 
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username'
     )
-    
+
     class Meta:
         fields = ('id', 'text', 'author', 'score', 'pub_date')
         read_only_fields = ('title',)
         model = Review
-        
+
     def validate(self, data):
+        if self.context['request'].method != 'POST':
+            return data
+
         author = self.context['request'].user
         title_id = self.context['view'].kwargs.get('title_id')
         if Review.objects.filter(
@@ -142,9 +160,8 @@ class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username'
     )
-    
+
     class Meta:
         fields = ('id', 'text', 'author', 'pub_date')
         read_only_fields = ('review',)
         model = Comment
-

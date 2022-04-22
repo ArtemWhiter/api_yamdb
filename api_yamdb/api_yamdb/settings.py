@@ -24,10 +24,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'django_filters',
-    'reviews',
     'api',
+    'reviews',
     'debug_toolbar',
-
 ]
 
 MIDDLEWARE = [
@@ -120,9 +119,7 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend'
     ],
 
-    'DEFAULT_PAGINATION_CLASS': [
-        'rest_framework.pagination.PageNumberPagination'
-    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
 
     'PAGE_SIZE': 10,
 }
@@ -157,7 +154,8 @@ SIMPLE_JWT = {
     'JTI_CLAIM': 'jti',
 }
 
-ROLE_CHOICES = [('user', 'user'),
-                ('moderator', 'moderator'),
-                ('admin', 'admin'),
-                ]
+ROLE_CHOICES = [
+    ('user', 'user'),
+    ('moderator', 'moderator'),
+    ('admin', 'admin'),
+    ]

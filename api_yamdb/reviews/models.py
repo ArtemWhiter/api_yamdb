@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
-from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db.models import UniqueConstraint, CheckConstraint
+from django.db import models
+from django.db.models import CheckConstraint, UniqueConstraint
 
 from api_yamdb.settings import ROLE_CHOICES
 
@@ -84,7 +84,7 @@ class Category(models.Model):
 class Genre(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True)
-    
+
     def __str__(self):
         return self.name
 
@@ -102,7 +102,7 @@ class Title(models.Model):
         on_delete=models.DO_NOTHING,
         related_name='title_category',
     )
-    
+
     def __str__(self):
         return self.name
 
@@ -127,6 +127,14 @@ class Review(models.Model):
             MinValueValidator(0)
         ],
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='author_review_title'
+            )
+        ]
 
     def __str__(self):
         return self.text
