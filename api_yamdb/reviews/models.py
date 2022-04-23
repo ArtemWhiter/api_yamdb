@@ -74,18 +74,8 @@ class Genre(models.Model):
 class Title(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField()
-    year = models.IntegerField()
-    """
-    year = models.IntegerField()
-    используй лучше PositiveSmallIntegerField
-для годов больших чисел не будет 
-Так же добавь db_index=True,
-Чтобы каждый год был уникальным и поиск по фильтрации осуществляться быстрее 
-https://stackoverflow.com/questions/59596176/when-we-should-use-db-index-true-in-django"""
-    genre = models.ManyToManyField(
-        Genre,
-        through="GenreTitle"
-    )
+    year = models.PositiveSmallIntegerField(db_index=True)
+    genre = models.ManyToManyField(Genre)
     category = models.ForeignKey(
         Category,
         on_delete=models.DO_NOTHING,
@@ -94,16 +84,6 @@ https://stackoverflow.com/questions/59596176/when-we-should-use-db-index-true-in
 
     def __str__(self):
         return self.name
-
-
-class GenreTitle(models.Model):
-    """
-class GenreTitle(models.Model):
-    Не нужно самим описывать отношение "многие к многим"
-для такого существует уже готовая реализация многие к многим
-https://metanit.com/python/django/5.7.php"""
-    title = models.ForeignKey(Title, on_delete=models.CASCADE)
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
 
 
 class Review(models.Model):
