@@ -56,8 +56,8 @@ class User(AbstractUser):
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=100)
-    slug = models.SlugField(unique=True)
+    name = models.CharField(max_length=256)
+    slug = models.SlugField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
@@ -94,22 +94,11 @@ class Review(models.Model):
     text = models.TextField()
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True)
-    score = models.IntegerField(
-        """
-        score = models.IntegerField(
-        используй лучше PositiveSmallIntegerField
-        больших чисел не будет"""
+    score = models.PositiveSmallIntegerField(
         'Оценка',
         validators=[
-            MaxValueValidator(10),
-            #"""MaxValueValidator(10),
-            #поменяй местами максимальный и минимальный элемент
-            #добавь для валидатора текст 
-            #Оценка не может быть меньше 1
-            #Оценка не может быть выше 10"""
-
-
-            MinValueValidator(0)
+            MinValueValidator(1, 'Оценка не может быть меньше 1'),
+            MaxValueValidator(10, 'Оценка не может быть выше 10')
         ],
     )
 
