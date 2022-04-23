@@ -7,29 +7,11 @@ from api_yamdb.settings import ROLE_CHOICES
 
 
 class User(AbstractUser):
-    username = models.CharField(
-        'Пользователь',
-        unique=True,
-        max_length=150,
-        blank=True,
-        null=True,
-    )
+
     email = models.EmailField(
         'Почта',
         max_length=254,
         unique=True
-    )
-    first_name = models.CharField(
-        'Фамилия',
-        max_length=150,
-        blank=True,
-        null=True
-    )
-    last_name = models.CharField(
-        'Имя',
-        max_length=150,
-        blank=True,
-        null=True
     )
 
     bio = models.TextField(
@@ -39,13 +21,10 @@ class User(AbstractUser):
 
     role = models.CharField(
         'Права пользователя',
-        max_length=10,
+        max_length=100,
         choices=ROLE_CHOICES,
         default='user'
     )
-
-    def __str__(self):
-        return self.username
 
     class Meta:
         ordering = ['username']
@@ -59,6 +38,9 @@ class User(AbstractUser):
                 name='unique_user'
             )
         ]
+
+    def __str__(self):
+        return self.username
 
     @property
     def is_admin(self):
@@ -93,6 +75,13 @@ class Title(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField()
     year = models.IntegerField()
+    """
+    year = models.IntegerField()
+    используй лучше PositiveSmallIntegerField
+для годов больших чисел не будет 
+Так же добавь db_index=True,
+Чтобы каждый год был уникальным и поиск по фильтрации осуществляться быстрее 
+https://stackoverflow.com/questions/59596176/when-we-should-use-db-index-true-in-django"""
     genre = models.ManyToManyField(
         Genre,
         through="GenreTitle"
@@ -108,6 +97,11 @@ class Title(models.Model):
 
 
 class GenreTitle(models.Model):
+    """
+class GenreTitle(models.Model):
+    Не нужно самим описывать отношение "многие к многим"
+для такого существует уже готовая реализация многие к многим
+https://metanit.com/python/django/5.7.php"""
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
 
@@ -121,9 +115,20 @@ class Review(models.Model):
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True)
     score = models.IntegerField(
+        """
+        score = models.IntegerField(
+        используй лучше PositiveSmallIntegerField
+        больших чисел не будет"""
         'Оценка',
         validators=[
             MaxValueValidator(10),
+            #"""MaxValueValidator(10),
+            #поменяй местами максимальный и минимальный элемент
+            #добавь для валидатора текст 
+            #Оценка не может быть меньше 1
+            #Оценка не может быть выше 10"""
+
+
             MinValueValidator(0)
         ],
     )
