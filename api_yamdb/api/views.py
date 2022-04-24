@@ -29,7 +29,6 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = AdminUserCreateSerializer
     permission_classes = (CreateIsAdmin, )
     pagination_class = PageNumberPagination
-
     lookup_field = 'username'
 
     def post(self, request, *args, **kwargs):
